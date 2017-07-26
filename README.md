@@ -6,8 +6,16 @@
 3. Add your model to the sample project
 
 ## Requirements
-Xcode 9.0 beta 3, iOS 11 beta 3
+Xcode 9.0 beta 4, iOS 11 beta 4
 
 ## SimpleSample
-Supports style transfer and classification models. Due to a bug in the betas, please choose the appropriate scheme when compiling.<br>
-![Choose scheme](/screenshots/simplesample-scheme.jpg?raw=true "Choose scheme")
+* Supports style transfer, classification, and detection models.
+* Choose from standard input sources - camera, photo gallery, **live video**
+
+![Style transfer](/screenshots/simplesample-style_transfer.gif?raw=true)
+![Classification](/screenshots/simplesample-classification.jpg?raw=true)
+![Detection](/screenshots/simplesample-detection.jpg?raw=true)
+
+## Notes
+Due to a bug in the betas, please choose the appropriate scheme when compiling.<br>
+![Choose scheme](/screenshots/simplesample-scheme.jpg?raw=true)

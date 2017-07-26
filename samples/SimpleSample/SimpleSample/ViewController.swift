@@ -22,7 +22,9 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     @IBOutlet weak var videoView: UIView!
     @IBOutlet weak var overlayView: UIView!
     @IBOutlet weak var imageView: UIImageView!
+    @IBOutlet weak var visualizationView: VisualizationView!
     @IBOutlet weak var statusLabel: UILabel!
+    @IBOutlet weak var statsLabel: UILabel!
     
     var visionCoreMLModel: VNCoreMLModel!
     var visionCoreMLRequest: VNCoreMLRequest!
@@ -38,6 +40,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     var previewLayer: AVCaptureVideoPreviewLayer!
     let sampleDispatchQueue = DispatchQueue(label: "SampleDispatch")
     let mlProcessingSlots = DispatchSemaphore(value: 1) // throttle the model processing
+    var processedSampleTimes = [Date]()
     
     var modelInput = ModelInput.unknown {
         didSet {
@@ -62,6 +65,10 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             visionCoreMLModel = try VNCoreMLModel(for: modelzoo.model)
             visionCoreMLRequest = VNCoreMLRequest(model: visionCoreMLModel, completionHandler: handleVisionMLRequest)
             visionCoreMLRequest.imageCropAndScaleOption = .scaleFill
+            
+            Timer.scheduledTimer(withTimeInterval:0.25, repeats: true) {_ in
+                self.updateOnTimer()
+            }
         } catch {
             fatalError("cannot load model:\(error)")
         }
@@ -112,10 +119,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         
         let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)!
-        // testing
-        //let testImage = UIImage(named: "white.png")!
-        //let pixelBuffer = pixelBufferFromCGImage(image: testImage.cgImage!)!
-        // end testing
         
         self.sendRequestToModel(image: nil, orPixelBuffer: pixelBuffer, skipIfBusy: true)
     }
@@ -123,13 +126,13 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     // MARK: - user interface
     @IBAction func getInputTapped(_ sender: Any) {
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        alert.addAction(UIAlertAction(title: "Take photo", style: .default, handler: { (action) in
-            self.modelInput = .camera
-            self.showPicker(source: .camera)
-        }))
         alert.addAction(UIAlertAction(title: "Pick photo", style: .default, handler: { (action) in
             self.modelInput = .photoLibrary
             self.showPicker(source: .photoLibrary)
+        }))
+        alert.addAction(UIAlertAction(title: "Take photo", style: .default, handler: { (action) in
+            self.modelInput = .camera
+            self.showPicker(source: .camera)
         }))
         alert.addAction(UIAlertAction(title: "Live video", style: .default, handler: { (action) in
             self.modelInput = .video
@@ -199,6 +202,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
                 assert (result == .success)
             }
         }
+        processedSampleTimes.append(Date())
+        processedSampleTimes.removeFirst(max(0,processedSampleTimes.count-10))
         
 #if !USE_COREML_STYLER
     let requestHandler = image != nil ? VNImageRequestHandler(cgImage: image!.cgImage!, orientation: image!.cgImagePropertyOrientation(), options:[:]) :
@@ -242,6 +247,11 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         if let observations = request.results as? [VNClassificationObservation] {
             handleClassificationObservations(observations)
             
+        } else if let observations = request.results as? [VNCoreMLFeatureValueObservation] {
+            //TODO: need a better way of routing model postprocessing instead of assuming this is yolo tiny
+            if let multiArray = observations.first?.featureValue.multiArrayValue {
+                YoloTiny.postprocess(multiArray: multiArray, intoView: visualizationView)
+            }
         } else {
             print("unexpected result type")
         }
@@ -273,6 +283,9 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         outputImage = nil
         imageView.image = nil
         statusLabel.text = nil
+        statsLabel.text = nil
+        visualizationView.clearBoxes()
+        processedSampleTimes.removeAll()
     }
     
     func updateImageView(image: UIImage?) {
@@ -286,6 +299,18 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     func updateLabel(status: String?) {
         DispatchQueue.main.async {
             self.statusLabel.text = status
+        }
+    }
+    
+    func updateOnTimer() {
+        if self.modelInput == .video {
+            self.visualizationView.decayStep()
+            
+            var fps = 0.0
+            if let earliestSampleTime = processedSampleTimes.first {
+                fps = Double(processedSampleTimes.count) / Date().timeIntervalSince(earliestSampleTime)
+                statsLabel.text = String(format:"%.2f fps", fps)
+            }
         }
     }
 }

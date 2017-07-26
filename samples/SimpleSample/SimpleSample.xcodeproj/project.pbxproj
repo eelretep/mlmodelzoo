@@ -14,6 +14,8 @@
 		E72AD1C41F23D8E700AAAB27 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E7BB62C81F1F1EEA004CF912 /* LaunchScreen.storyboard */; };
 		E72AD1C51F23D8E700AAAB27 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E7BB62C61F1F1EEA004CF912 /* Assets.xcassets */; };
 		E72AD1C61F23D8E700AAAB27 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E7BB62C31F1F1EEA004CF912 /* Main.storyboard */; };
+		E76BB9A71F2A926A00EEFF39 /* VisualizationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7E1F82C1F2916E10050ABBD /* VisualizationView.swift */; };
+		E76BB9A81F2A927000EEFF39 /* ModelProcessingYolo.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7E1F82A1F29155A0050ABBD /* ModelProcessingYolo.swift */; };
 		E78227BE1F2178E9005A5A51 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = E78227BD1F2178E9005A5A51 /* Utilities.swift */; };
 		E7BB62C01F1F1EEA004CF912 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7BB62BF1F1F1EEA004CF912 /* AppDelegate.swift */; };
 		E7BB62C21F1F1EEA004CF912 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7BB62C11F1F1EEA004CF912 /* ViewController.swift */; };
@@ -21,6 +23,8 @@
 		E7BB62C71F1F1EEA004CF912 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E7BB62C61F1F1EEA004CF912 /* Assets.xcassets */; };
 		E7BB62CA1F1F1EEA004CF912 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E7BB62C81F1F1EEA004CF912 /* LaunchScreen.storyboard */; };
 		E7BB62DA1F1FD5CD004CF912 /* mlmodelzoo.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = E7BB62D61F1F21C9004CF912 /* mlmodelzoo.mlmodel */; };
+		E7E1F82B1F29155A0050ABBD /* ModelProcessingYolo.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7E1F82A1F29155A0050ABBD /* ModelProcessingYolo.swift */; };
+		E7E1F82D1F2916E10050ABBD /* VisualizationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7E1F82C1F2916E10050ABBD /* VisualizationView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,6 +38,8 @@
 		E7BB62C91F1F1EEA004CF912 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		E7BB62CB1F1F1EEA004CF912 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E7BB62D61F1F21C9004CF912 /* mlmodelzoo.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = mlmodelzoo.mlmodel; sourceTree = "<group>"; };
+		E7E1F82A1F29155A0050ABBD /* ModelProcessingYolo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelProcessingYolo.swift; sourceTree = "<group>"; };
+		E7E1F82C1F2916E10050ABBD /* VisualizationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualizationView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,7 +82,9 @@
 			children = (
 				E7BB62BF1F1F1EEA004CF912 /* AppDelegate.swift */,
 				E7BB62C11F1F1EEA004CF912 /* ViewController.swift */,
+				E7E1F82C1F2916E10050ABBD /* VisualizationView.swift */,
 				E78227BD1F2178E9005A5A51 /* Utilities.swift */,
+				E7E1F82A1F29155A0050ABBD /* ModelProcessingYolo.swift */,
 				E7BB62C31F1F1EEA004CF912 /* Main.storyboard */,
 				E7BB62C61F1F1EEA004CF912 /* Assets.xcassets */,
 				E7BB62C81F1F1EEA004CF912 /* LaunchScreen.storyboard */,
@@ -188,7 +196,9 @@
 				E72AD1BE1F23D8E700AAAB27 /* mlmodelzoo.mlmodel in Sources */,
 				E72AD1BF1F23D8E700AAAB27 /* ViewController.swift in Sources */,
 				E72AD1C01F23D8E700AAAB27 /* Utilities.swift in Sources */,
+				E76BB9A71F2A926A00EEFF39 /* VisualizationView.swift in Sources */,
 				E72AD1C11F23D8E700AAAB27 /* AppDelegate.swift in Sources */,
+				E76BB9A81F2A927000EEFF39 /* ModelProcessingYolo.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -197,6 +207,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				E7BB62DA1F1FD5CD004CF912 /* mlmodelzoo.mlmodel in Sources */,
+				E7E1F82D1F2916E10050ABBD /* VisualizationView.swift in Sources */,
+				E7E1F82B1F29155A0050ABBD /* ModelProcessingYolo.swift in Sources */,
 				E7BB62C21F1F1EEA004CF912 /* ViewController.swift in Sources */,
 				E78227BE1F2178E9005A5A51 /* Utilities.swift in Sources */,
 				E7BB62C01F1F1EEA004CF912 /* AppDelegate.swift in Sources */,

@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreML
 
 extension UIImage {
     func resizedImage(width:Int, height:Int) -> UIImage {
@@ -77,8 +78,7 @@ public func pixelBufferBGRToImage(_ pixelBuffer: CVPixelBuffer, width outWidth: 
     return uiImage
 }
 
-public func CGImageToPixelBufferRGB(_ image: CGImage, width outWidth: Int, height outHeight: Int) -> CVPixelBuffer?
-{
+public func CGImageToPixelBufferRGB(_ image: CGImage, width outWidth: Int, height outHeight: Int) -> CVPixelBuffer? {
     var pixelBuffer: CVPixelBuffer?
     if kCVReturnSuccess == CVPixelBufferCreate(kCFAllocatorDefault, outWidth, outHeight, kCVPixelFormatType_32ARGB, nil, &pixelBuffer) {
         let bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer!)
@@ -95,4 +95,31 @@ public func CGImageToPixelBufferRGB(_ image: CGImage, width outWidth: Int, heigh
     }
     
     return pixelBuffer
+}
+
+func randomColor(seed: String) -> UIColor {
+    var total: Int = 0
+    for u in seed.unicodeScalars {
+        total += Int(UInt32(u))
+    }
+    
+    srand48(total * 200)
+    let r = CGFloat(drand48())
+    
+    srand48(total)
+    let g = CGFloat(drand48())
+    
+    srand48(total / 200)
+    let b = CGFloat(drand48())
+    
+    return UIColor(red: r, green: g, blue: b, alpha: 1)
+}
+
+public func IOU(_ rect1: CGRect, _ rect2: CGRect) -> CGFloat {
+    let intersection = rect1.intersection(rect2)
+    let intersectionArea = intersection.width * intersection.height
+    let unionArea = rect1.width * rect1.height + rect2.width * rect2.height - intersectionArea
+    let iou = intersectionArea / unionArea
+    
+    return iou
 }
