@@ -13,8 +13,9 @@ Xcode 9.0 beta 4, iOS 11 beta 4
 * Choose from standard input sources - camera, photo gallery, **live video**
 
 ![Style transfer](/screenshots/simplesample-style_transfer.gif?raw=true)
+![Detection](/screenshots/simplesample-detection.gif?raw=true)<br>
 ![Classification](/screenshots/simplesample-classification.jpg?raw=true)
-![Detection](/screenshots/simplesample-detection.jpg?raw=true)
+![Detection](/screenshots/simplesample-detection.jpg?raw=true)<br>
 
 ## Notes
 Due to a bug in the betas, please choose the appropriate scheme when compiling.<br>
