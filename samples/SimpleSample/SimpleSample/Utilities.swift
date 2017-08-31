@@ -8,6 +8,7 @@
 
 import UIKit
 import CoreML
+import Accelerate
 
 extension UIImage {
     func resizedImage(width:Int, height:Int) -> UIImage {
@@ -24,6 +25,8 @@ extension UIImage {
             if let scaledImage = UIGraphicsGetImageFromCurrentImageContext() {
                 resizedImage = scaledImage
             }
+            
+            UIGraphicsEndImageContext()
         }
         
         return resizedImage
@@ -95,6 +98,51 @@ public func CGImageToPixelBufferRGB(_ image: CGImage, width outWidth: Int, heigh
     }
     
     return pixelBuffer
+}
+
+public func pixelBufferScale(_ pixelBuffer: CVPixelBuffer, width outWidth: Int, height outHeight: Int, reflectHorizontal: Bool = false) -> CVPixelBuffer? {
+    let inWidth = CVPixelBufferGetWidth(pixelBuffer)
+    let inHeight = CVPixelBufferGetHeight(pixelBuffer)
+    
+    if (inWidth == outWidth && inHeight == outHeight) {
+        return pixelBuffer
+
+    } else {
+        CVPixelBufferLockBaseAddress(pixelBuffer, .readOnly);
+        let inData = CVPixelBufferGetBaseAddress(pixelBuffer)!
+        let inBytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer)
+
+        let format = CVPixelBufferGetPixelFormatType(pixelBuffer)
+        assert(format == kCVPixelFormatType_32BGRA)
+     
+        var outPixelBuffer: CVPixelBuffer?
+        if kCVReturnSuccess == CVPixelBufferCreate(kCFAllocatorDefault, outWidth, outHeight, kCVPixelFormatType_32BGRA, nil, &outPixelBuffer) {
+            CVPixelBufferLockBaseAddress(outPixelBuffer!, .readOnly);
+            let outData = CVPixelBufferGetBaseAddress(outPixelBuffer!)!
+            let outBytesPerRow = CVPixelBufferGetBytesPerRow(outPixelBuffer!)
+            
+            var inBuffer = vImage_Buffer(data: inData, height: vImagePixelCount(inHeight), width: vImagePixelCount(inWidth), rowBytes: inBytesPerRow)
+            var outBuffer = vImage_Buffer(data: outData, height: vImagePixelCount(outHeight), width: vImagePixelCount(outWidth), rowBytes: outBytesPerRow)
+        
+            var error = vImageScale_ARGB8888(&inBuffer, &outBuffer, nil, vImage_Flags(kvImageNoFlags))
+            if error != kvImageNoError {
+                 print(error)
+            }
+            
+            if reflectHorizontal {
+                error = vImageHorizontalReflect_ARGB8888(&outBuffer, &outBuffer, vImage_Flags(kvImageNoFlags))
+                if error != kvImageNoError {
+                    print(error)
+                }
+            }
+            
+            CVPixelBufferUnlockBaseAddress(outPixelBuffer!, .readOnly);
+        }
+        
+        CVPixelBufferUnlockBaseAddress(pixelBuffer, .readOnly);
+        
+        return outPixelBuffer
+    }
 }
 
 func randomColor(seed: String) -> UIColor {

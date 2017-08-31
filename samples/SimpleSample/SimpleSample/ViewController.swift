@@ -14,7 +14,8 @@ enum ModelInput {
     case unknown
     case photoLibrary
     case camera
-    case video
+    case video_back
+    case video_front
 }
 
 class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, AVCaptureVideoDataOutputSampleBufferDelegate {
@@ -46,13 +47,17 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         didSet {
             clearOverlay()
             
-            if modelInput == .video {
+            switch modelInput {
+            case .video_back, .video_front:
+                self.session?.stopRunning()
                 setupAVSourceCapture()
                 session.startRunning()
                 self.overlayView.backgroundColor = UIColor.clear
-            } else {
+                
+            default:
                 self.session?.stopRunning()
                 self.overlayView.backgroundColor = UIColor.white
+    
             }
         }
     }
@@ -84,7 +89,12 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         session = AVCaptureSession()
         session.sessionPreset = capturePreset
         
-        let device = AVCaptureDevice.default(for: .video)
+        var device: AVCaptureDevice?
+        if self.modelInput == .video_front {
+            device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front)
+        } else {
+            device = AVCaptureDevice.default(for: .video)
+        }
         guard let deviceInput = try? AVCaptureDeviceInput(device: device!) else
         {
             fatalError()
@@ -134,8 +144,11 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             self.modelInput = .camera
             self.showPicker(source: .camera)
         }))
-        alert.addAction(UIAlertAction(title: "Live video", style: .default, handler: { (action) in
-            self.modelInput = .video
+        alert.addAction(UIAlertAction(title: "Live video ", style: .default, handler: { (action) in
+            self.modelInput = .video_back
+        }))
+        alert.addAction(UIAlertAction(title: "Live video (front)", style: .default, handler: { (action) in
+            self.modelInput = .video_front
         }))
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action) in
         }))
@@ -206,8 +219,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         processedSampleTimes.removeFirst(max(0,processedSampleTimes.count-10))
         
 #if !USE_COREML_STYLER
-    let requestHandler = image != nil ? VNImageRequestHandler(cgImage: image!.cgImage!, orientation: image!.cgImagePropertyOrientation(), options:[:]) :
-        VNImageRequestHandler(cvPixelBuffer: pixelBuffer!, options: [:])
+        let requestHandler = image != nil ? VNImageRequestHandler(cgImage: image!.cgImage!, orientation: image!.cgImagePropertyOrientation(), options:[:]) : VNImageRequestHandler(cvPixelBuffer: pixelBuffer!, options: [:])
     
         DispatchQueue.global(qos: .userInitiated).async { // avoid blocking the queue
             do {
@@ -220,6 +232,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             }
         }
 #else //iOS11 beta3 - CoreML workaround for internal Vision bug when resizing images to fit model input dimensions
+        // style transfer
         let inputWidth = 480
         let inputHeight = 640
     
@@ -230,7 +243,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
                     let outPixelBuffer = try self.modelzoo.prediction(input: mlmodelzooInput(input1: inPixelBuffer)).output1
                     self.updateOutputWithPixelBuffer(outPixelBuffer, width: Int(image.size.width), height: Int(image.size.height), orientation: image.imageOrientation)
                 } else {
-                    let outPixelBuffer = try self.modelzoo.prediction(input: mlmodelzooInput(input1: pixelBuffer!)).output1
+                    let inPixelBuffer = pixelBufferScale(pixelBuffer!, width: inputWidth, height: inputHeight, reflectHorizontal: self.modelInput == .video_front)
+                    let outPixelBuffer = try self.modelzoo.prediction(input: mlmodelzooInput(input1: inPixelBuffer!)).output1
                     self.updateOutputWithPixelBuffer(outPixelBuffer, width: inputWidth, height: inputHeight, orientation: UIImageOrientation.up)
                 }
                 self.mlProcessingSlots.signal()
@@ -303,7 +317,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     }
     
     func updateOnTimer() {
-        if self.modelInput == .video {
+        if self.modelInput == .video_back || self.modelInput == .video_front {
             self.visualizationView.decayStep()
             
             var fps = 0.0
