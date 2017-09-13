@@ -6,7 +6,7 @@
 3. Add your model to the sample project
 
 ## Requirements
-Xcode 9.0 beta 4, iOS 11 beta 4
+Xcode 9.0, iOS 11
 
 ## SimpleSample
 * Supports style transfer, classification, and detection models.
